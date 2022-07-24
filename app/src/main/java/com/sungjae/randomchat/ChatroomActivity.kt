@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatEditText
 import org.eclipse.paho.client.mqttv3.MqttClient
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttMessage
 
 class ChatroomActivity : AppCompatActivity() {
@@ -29,7 +30,10 @@ class ChatroomActivity : AppCompatActivity() {
     private fun connect(): MqttClient {
         val url = "tcp://220.79.204.104:1883"
         val mqttClient = MqttClient(url, MqttClient.generateClientId(), null) //persistence 파라미터 안 주면 에러남;;
-        mqttClient.connect()
+        val connectOptions = MqttConnectOptions()
+        connectOptions.userName = "test"
+        connectOptions.password = "5534".toCharArray()
+        mqttClient.connect(connectOptions)
         return mqttClient
     }
 
