@@ -11,6 +11,8 @@ import androidx.appcompat.widget.AppCompatEditText
 import androidx.appcompat.widget.AppCompatTextView
 import org.eclipse.paho.client.mqttv3.*
 import org.json.JSONObject
+import java.util.*
+import kotlin.concurrent.timerTask
 
 class ChatroomActivity : AppCompatActivity() {
     private lateinit var mqttClient: MqttClient
@@ -21,7 +23,7 @@ class ChatroomActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chatroom)
 
-        mqttClient = connect()
+        connect()
 
         val btnSend = findViewById<AppCompatButton>(R.id.btnSend)
         val etMessage = findViewById<AppCompatEditText>(R.id.etMessage)
@@ -32,7 +34,6 @@ class ChatroomActivity : AppCompatActivity() {
             if (etMessage.text.toString() != "") {
                 val message = etMessage.text.toString()
                 etMessage.setText("")
-                publish(mqttClient, getTopic(), message) // 전송
 
                 // 내 메시지 버블 삽입
                 val view = LayoutInflater.from(this).inflate(R.layout.my_chat, null)
@@ -40,7 +41,10 @@ class ChatroomActivity : AppCompatActivity() {
                 textView.text = message
                 llChat.addView(view)
 
-                svChat.fullScroll(ScrollView.FOCUS_DOWN) // 맨 밑으로 스크롤 다운
+                Timer().schedule(timerTask { svChat.smoothScrollTo(0, llChat.height) }, 300) // 시간차 안 주면 새로운 view 넣기 전 height으로 인식 함
+                //svChat.fullScroll(ScrollView.FOCUS_DOWN) // 맨 밑으로 스크롤 다운
+
+                publish(mqttClient, getTopic(), message) // 전송
             }
         }
     }
@@ -50,10 +54,10 @@ class ChatroomActivity : AppCompatActivity() {
         if (mqttClient.isConnected) mqttClient.disconnect()
     }
 
-    private fun connect(): MqttClient {
+    private fun connect() {
         val url = "tcp://220.79.204.104:1883"
         if (!this::clientId.isInitialized) clientId = MqttClient.generateClientId()
-        val mqttClient = MqttClient(url, clientId, null) //persistence 파라미터 안 주면 에러남;;
+        mqttClient = MqttClient(url, clientId, null) //persistence 파라미터 안 주면 에러남;;
         val connectOptions = MqttConnectOptions()
         connectOptions.userName = "test"
         connectOptions.password = "5534".toCharArray()
@@ -63,7 +67,7 @@ class ChatroomActivity : AppCompatActivity() {
         mqttClient.subscribe(getTopic())
         mqttClient.setCallback(object : MqttCallback {
             override fun connectionLost(cause: Throwable?) {
-                Log.d(application.packageName, "Connection Lost")
+                Log.e(application.packageName, "Connection Lost")
                 connect()
             }
 
@@ -90,8 +94,6 @@ class ChatroomActivity : AppCompatActivity() {
                 TODO("Not yet implemented")
             }
         })
-
-        return mqttClient
     }
 
     private fun getTopic(): String {
