@@ -17,7 +17,7 @@ import kotlin.concurrent.timerTask
 class ChatroomActivity : AppCompatActivity() {
     private lateinit var mqttClient: MqttClient
     private lateinit var llChat: LinearLayout
-    private lateinit var clientId: String
+    private lateinit var clientId: String  //TODO: WaitingRoomActivity에 정의되어 있으므로 추후 삭제
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +56,9 @@ class ChatroomActivity : AppCompatActivity() {
 
     private fun connect() {
         val url = "tcp://220.79.204.104:1883"
+        //TODO: WaitingRoomActivity에 정의되어 있으므로 추후 삭제
         if (!this::clientId.isInitialized) clientId = MqttClient.generateClientId()
+
         mqttClient = MqttClient(url, clientId, null) //persistence 파라미터 안 주면 에러남;;
         val connectOptions = MqttConnectOptions()
         connectOptions.userName = "test"
