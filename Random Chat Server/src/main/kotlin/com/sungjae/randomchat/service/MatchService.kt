@@ -1,8 +1,10 @@
-package com.randomchat.service
+package com.sungjae.randomchat.service
 
-import com.randomchat.response.MatchResponse
+import com.sungjae.randomchat.RandomChatApplication.Companion.hashMap
+import com.sungjae.randomchat.RandomChatApplication.Companion.queue
+import com.sungjae.randomchat.response.MatchResponse
 import org.springframework.stereotype.Service
-import com.randomchat.request.MatchRequest
+import com.sungjae.randomchat.request.MatchRequest
 import java.util.*
 import kotlin.collections.HashMap
 import kotlin.random.Random
@@ -11,10 +13,7 @@ import kotlin.random.Random
  * 비즈니스 로직 처리하는 부분 */
 @Service
 class MatchService {
-    companion object {
-        val queue = LinkedList<String>()
-        val hashMap = HashMap<String, String>()
-    }
+
     fun match(matchRequest: MatchRequest): MatchResponse {
         val clientId = matchRequest.clientId
 
@@ -28,11 +27,16 @@ class MatchService {
             queue.add(matchRequest.clientId)
             return MatchResponse(null)
         } else {
-            // 내가 들어와서 매칭된 경우
-            val theirId = queue.pollFirst()
-            val topic = "${System.currentTimeMillis()}"
-            hashMap[theirId] = topic
-            return MatchResponse(topic)
+            if (queue.peek() != clientId) {
+                // 내가 들어와서 매칭된 경우
+                val theirId = queue.pollFirst()
+                val topic = "${System.currentTimeMillis()}"
+                hashMap[theirId] = topic
+                return MatchResponse(topic)
+            } else {
+                // 아직도 나 혼자 기다리는 경우
+                return MatchResponse(null)
+            }
         }
     }
 }

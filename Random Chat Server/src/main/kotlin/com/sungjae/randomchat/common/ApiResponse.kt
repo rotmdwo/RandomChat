@@ -1,4 +1,4 @@
-package com.randomchat.common
+package com.sungjae.randomchat.common
 
 data class ApiResponse(val success: Boolean, val data: Any? = null, val message: String? = null)
 {
