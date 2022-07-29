@@ -3,11 +3,8 @@ package com.sungjae.randomchat.controller
 import com.sungjae.randomchat.common.ApiResponse
 import com.sungjae.randomchat.request.MatchRequest
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.bind.annotation.RequestBody
 import com.sungjae.randomchat.service.MatchService
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api")

@@ -19,16 +19,19 @@ class MatchService {
 
         if (hashMap.contains(clientId)) {
             // 이미 상대방 매칭된 경우
+            println("Client ID [$clientId] has found a mate.")
             val topic = hashMap[clientId]
             hashMap.remove(clientId)
             return MatchResponse(topic)
         } else if (queue.isEmpty()) {
             // 매칭 기다리는 사람이 아무도 없는 경우
+            println("Client ID [$clientId] is waiting to chat.")
             queue.add(matchRequest.clientId)
             return MatchResponse(null)
         } else {
             if (queue.peek() != clientId) {
                 // 내가 들어와서 매칭된 경우
+                println("Client ID [$clientId] has found a mate.")
                 val theirId = queue.pollFirst()
                 val topic = "${System.currentTimeMillis()}"
                 hashMap[theirId] = topic
