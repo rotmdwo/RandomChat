@@ -34,6 +34,7 @@ class ChatroomActivity : AppCompatActivity() {
         val etMessage = findViewById<AppCompatEditText>(R.id.etMessage)
         llChat = findViewById(R.id.llChat)
         val svChat = findViewById<ScrollView>(R.id.svChat)
+        val btnExit = findViewById<AppCompatButton>(R.id.btnExit)
 
         btnSend.setOnClickListener {
             if (etMessage.text.toString() != "") {
@@ -52,6 +53,8 @@ class ChatroomActivity : AppCompatActivity() {
                 publish(mqttClient, getTopic(), message) // 전송
             }
         }
+
+        btnExit.setOnClickListener { finish() }
     }
 
     override fun onDestroy() {

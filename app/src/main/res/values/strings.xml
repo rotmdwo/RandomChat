@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Random Chat</string>
+    <string name="begin_chat">Begin Chat</string>
+    <string name="exit">Exit</string>
+    <string name="looking_for_match">Looking for Match</string>
+    <string name="cancel">Cancel</string>
 </resources>

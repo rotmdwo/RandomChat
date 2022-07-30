@@ -4,6 +4,63 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".WaitingroomActivity">
+    tools:context=".WaitingroomActivity"
+    android:background="@drawable/bg1">
 
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnBeginChat"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintWidth_percent="0.7"
+        android:text="@string/begin_chat"
+        android:textSize="25sp"
+        app:layout_constraintVertical_bias="0.6"
+        android:background="@drawable/begin_chat_button"
+        android:translationZ="1dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/llLoading"/>
+
+    <LinearLayout
+        android:id="@+id/llLoading"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintWidth_percent="0.7"
+        android:orientation="vertical"
+        android:background="@color/white"
+        android:visibility="invisible"
+        tools:visibility="visible"
+        android:translationZ="2dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/looking_for_match"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginVertical="15dp"/>
+
+        <androidx.core.widget.ContentLoadingProgressBar
+            android:id="@+id/pbLoading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleY="3"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="15dp"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnCancelMatch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel"
+            android:background="#B4AB9C"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginVertical="15dp"/>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

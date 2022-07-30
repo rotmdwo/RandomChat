@@ -4,6 +4,10 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.LinearLayout
+import androidx.appcompat.widget.AppCompatButton
+import androidx.core.widget.ContentLoadingProgressBar
 import com.sungjae.randomchat.request.MatchRequest
 import com.sungjae.randomchat.response.ApiResponse
 import com.sungjae.randomchat.response.MatchResponse
@@ -14,6 +18,11 @@ import kotlin.concurrent.timerTask
 
 class WaitingroomActivity : AppCompatActivity() {
     private lateinit var clientId: String
+    private lateinit var btnBeginChat: AppCompatButton
+    private lateinit var pbLoading: ContentLoadingProgressBar
+    private lateinit var llLoading: LinearLayout
+    private lateinit var btnCancelMatch: AppCompatButton
+    private lateinit var loadingTimer: Timer
     var isLoggingOut = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,23 +30,68 @@ class WaitingroomActivity : AppCompatActivity() {
         setContentView(R.layout.activity_waitingroom)
 
         clientId = MqttClient.generateClientId()
+
+        btnBeginChat = findViewById(R.id.btnBeginChat)
+        pbLoading = findViewById(R.id.pbLoading)
+        llLoading = findViewById(R.id.llLoading)
+        btnCancelMatch = findViewById(R.id.btnCancelMatch)
+
+        btnBeginChat.setOnClickListener {
+            setClickable(it, false)
+            btnBeginChat.visibility = View.INVISIBLE
+            initLoadingBar()
+            isLoggingOut = false
+            // 코루틴 스코프를 사용하면 suspend 함수로 선언 안 해도 됨
+            CoroutineScope(Dispatchers.IO).launch {
+                getTopic()
+            }
+        }
+        btnCancelMatch.setOnClickListener {
+            llLoading.visibility = View.INVISIBLE
+            btnBeginChat.visibility = View.VISIBLE
+            setClickable(btnBeginChat, true)
+            isLoggingOut = true
+            loadingTimer.cancel()
+            CoroutineScope(Dispatchers.IO).launch {
+                logout()
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        isLoggingOut = false
-        // 코루틴 스코프를 사용하면 suspend 함수로 선언 안 해도 됨
-        CoroutineScope(Dispatchers.IO).launch {
-            getTopic()
-        }
+        setClickable(btnBeginChat, true)
+        llLoading.visibility = View.INVISIBLE
+        btnBeginChat.visibility = View.VISIBLE
     }
 
     override fun onStop() {
         super.onStop()
+        llLoading.visibility = View.INVISIBLE
+        btnBeginChat.visibility = View.VISIBLE
+        setClickable(btnBeginChat, true)
         isLoggingOut = true
+        loadingTimer.cancel()
         CoroutineScope(Dispatchers.IO).launch {
             logout()
         }
+    }
+
+    private fun setClickable(view: View, isTrue: Boolean) {
+        view.isClickable = isTrue
+    }
+
+    private fun initLoadingBar() {
+        llLoading.visibility = View.VISIBLE
+        pbLoading.progress = 0
+        loadingTimer = Timer()
+        loadingTimer.scheduleAtFixedRate(timerTask {
+            if (pbLoading.progress == 100) {
+                pbLoading.progress = 0
+            } else {
+                pbLoading.progress += 1
+            }
+        }, 0L, 50L)
     }
 
     /* Match API */
