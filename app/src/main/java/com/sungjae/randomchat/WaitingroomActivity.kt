@@ -5,12 +5,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.LinearLayout
-import androidx.appcompat.widget.AppCompatButton
-import androidx.core.widget.ContentLoadingProgressBar
 import com.sungjae.randomchat.request.MatchRequest
 import com.sungjae.randomchat.response.ApiResponse
 import com.sungjae.randomchat.response.MatchResponse
+import kotlinx.android.synthetic.main.activity_waitingroom.*
 import kotlinx.coroutines.*
 import org.eclipse.paho.client.mqttv3.MqttClient
 import java.util.*
@@ -18,10 +16,6 @@ import kotlin.concurrent.timerTask
 
 class WaitingroomActivity : AppCompatActivity() {
     private lateinit var clientId: String
-    private lateinit var btnBeginChat: AppCompatButton
-    private lateinit var pbLoading: ContentLoadingProgressBar
-    private lateinit var llLoading: LinearLayout
-    private lateinit var btnCancelMatch: AppCompatButton
     private lateinit var loadingTimer: Timer
     var isLoggingOut = false
 
@@ -30,11 +24,6 @@ class WaitingroomActivity : AppCompatActivity() {
         setContentView(R.layout.activity_waitingroom)
 
         clientId = MqttClient.generateClientId()
-
-        btnBeginChat = findViewById(R.id.btnBeginChat)
-        pbLoading = findViewById(R.id.pbLoading)
-        llLoading = findViewById(R.id.llLoading)
-        btnCancelMatch = findViewById(R.id.btnCancelMatch)
 
         btnBeginChat.setOnClickListener {
             setClickable(it, false)

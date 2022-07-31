@@ -9,7 +9,9 @@
         <entry key="app/src/main/res/drawable/their_chat_bubble.xml" value="0.13" />
         <entry key="app/src/main/res/layout/activity_chatroom.xml" value="0.23645833333333333" />
         <entry key="app/src/main/res/layout/activity_waitingroom.xml" value="0.24947916666666667" />
+        <entry key="app/src/main/res/layout/left_message.xml" value="0.24947916666666667" />
         <entry key="app/src/main/res/layout/my_chat.xml" value="0.25052083333333336" />
+        <entry key="app/src/main/res/layout/quitted_message.xml" value="0.234375" />
         <entry key="app/src/main/res/layout/their_chat.xml" value="0.25052083333333336" />
       </map>
     </option>

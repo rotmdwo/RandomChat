@@ -4,19 +4,17 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.widget.LinearLayout
-import android.widget.ScrollView
-import androidx.appcompat.widget.AppCompatButton
-import androidx.appcompat.widget.AppCompatEditText
 import androidx.appcompat.widget.AppCompatTextView
+import kotlinx.android.synthetic.main.activity_chatroom.*
 import org.eclipse.paho.client.mqttv3.*
 import org.json.JSONObject
 import java.util.*
 import kotlin.concurrent.timerTask
 
 class ChatroomActivity : AppCompatActivity() {
+    private val endOfChatCode = "272c68863af4c821491753d9ae636b86f74e1a11" // End of Chat : SHA1
+    private var notifiedEndOfChat = false
     private lateinit var mqttClient: MqttClient
-    private lateinit var llChat: LinearLayout
     private lateinit var clientId: String
     private lateinit var topic: String
 
@@ -29,12 +27,6 @@ class ChatroomActivity : AppCompatActivity() {
         topic = intent.getStringExtra("topic")!!
 
         connect()
-
-        val btnSend = findViewById<AppCompatButton>(R.id.btnSend)
-        val etMessage = findViewById<AppCompatEditText>(R.id.etMessage)
-        llChat = findViewById(R.id.llChat)
-        val svChat = findViewById<ScrollView>(R.id.svChat)
-        val btnExit = findViewById<AppCompatButton>(R.id.btnExit)
 
         btnSend.setOnClickListener {
             if (etMessage.text.toString() != "") {
@@ -54,11 +46,16 @@ class ChatroomActivity : AppCompatActivity() {
             }
         }
 
-        btnExit.setOnClickListener { finish() }
+        btnExit.setOnClickListener {
+            notifyEndOfChat()
+            notifiedEndOfChat = true
+            finish()
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        if (!notifiedEndOfChat) notifyEndOfChat()
         if (mqttClient.isConnected) mqttClient.disconnect()
     }
 
@@ -86,13 +83,25 @@ class ChatroomActivity : AppCompatActivity() {
                     val theirMessage = jsonObject.getString("content")
 
                     if (theirId != clientId) {
-                        // 콜백함수 안에서 runOnUiThread 안 쓰면 UI 업데이트 안 됨
-                        runOnUiThread {
-                            // 상대 메시지 버블 삽입
-                            val view = LayoutInflater.from(this@ChatroomActivity).inflate(R.layout.their_chat, null)
-                            val textView = view.findViewById<AppCompatTextView>(R.id.tvTheirMessage)
-                            textView.text = theirMessage
-                            llChat.addView(view)
+                        if (endOfChatCode == theirMessage) {
+                            // 상대방이 방에서 나감
+
+                            etMessage.isEnabled = false
+                            btnSend.isClickable = false
+
+                            runOnUiThread {
+                                val leftMessageView = LayoutInflater.from(this@ChatroomActivity).inflate(R.layout.left_message, null)
+                                llChat.addView(leftMessageView)
+                            }
+                        } else {
+                            // 콜백함수 안에서 runOnUiThread 안 쓰면 UI 업데이트 안 됨
+                            runOnUiThread {
+                                // 상대 메시지 버블 삽입
+                                val view = LayoutInflater.from(this@ChatroomActivity).inflate(R.layout.their_chat, null)
+                                val textView = view.findViewById<AppCompatTextView>(R.id.tvTheirMessage)
+                                textView.text = theirMessage
+                                llChat.addView(view)
+                            }
                         }
                     }
                 }
@@ -111,5 +120,9 @@ class ChatroomActivity : AppCompatActivity() {
     private fun publish(mqttClient: MqttClient, topic: String, message: String) {
         val json = "{\"id\":\""+clientId+"\",\"content\":\""+message+"\"}"
         mqttClient.publish(topic, MqttMessage(json.toByteArray()))
+    }
+
+    private fun notifyEndOfChat() {
+        publish(mqttClient, getTopic(), endOfChatCode)
     }
 }

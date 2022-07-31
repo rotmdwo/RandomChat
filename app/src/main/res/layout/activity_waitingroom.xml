@@ -16,7 +16,6 @@
         android:textSize="25sp"
         app:layout_constraintVertical_bias="0.6"
         android:background="@drawable/begin_chat_button"
-        android:translationZ="1dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="@+id/llLoading"/>
@@ -30,7 +29,6 @@
         android:background="@color/white"
         android:visibility="invisible"
         tools:visibility="visible"
-        android:translationZ="2dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
