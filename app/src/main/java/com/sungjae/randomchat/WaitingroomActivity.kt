@@ -5,12 +5,14 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import com.sungjae.randomchat.request.MatchRequest
 import com.sungjae.randomchat.response.ApiResponse
 import com.sungjae.randomchat.response.MatchResponse
 import kotlinx.android.synthetic.main.activity_waitingroom.*
 import kotlinx.coroutines.*
 import org.eclipse.paho.client.mqttv3.MqttClient
+import java.net.ConnectException
 import java.util.*
 import kotlin.concurrent.timerTask
 
@@ -32,13 +34,11 @@ class WaitingroomActivity : AppCompatActivity() {
             isLoggingOut = false
             // 코루틴 스코프를 사용하면 suspend 함수로 선언 안 해도 됨
             CoroutineScope(Dispatchers.IO).launch {
-                getTopic()
+                findMatch()
             }
         }
         btnCancelMatch.setOnClickListener {
-            llLoading.visibility = View.INVISIBLE
-            btnBeginChat.visibility = View.VISIBLE
-            setClickable(btnBeginChat, true)
+            hideLoadingAndShowButton()
             isLoggingOut = true
             loadingTimer.cancel()
             CoroutineScope(Dispatchers.IO).launch {
@@ -56,9 +56,7 @@ class WaitingroomActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        llLoading.visibility = View.INVISIBLE
-        btnBeginChat.visibility = View.VISIBLE
-        setClickable(btnBeginChat, true)
+        hideLoadingAndShowButton()
         isLoggingOut = true
         loadingTimer.cancel()
         CoroutineScope(Dispatchers.IO).launch {
@@ -83,14 +81,36 @@ class WaitingroomActivity : AppCompatActivity() {
         }, 0L, 50L)
     }
 
-    /* Match API */
-    private suspend fun getTopic() {
-        val request = MatchRequest(clientId)
-
-        val response = requestMatch(request)
-        onMatchResponse(response)
+    private fun hideLoadingAndShowButton() {
+        llLoading.visibility = View.INVISIBLE
+        btnBeginChat.visibility = View.VISIBLE
+        setClickable(btnBeginChat, true)
     }
 
+    /* Match API */
+    private suspend fun findMatch() {
+        val request = MatchRequest(clientId)
+
+        runCatching {
+            val response = requestMatch(request)
+            return@runCatching response // onSuccess에 변수 전달
+        }.onSuccess {
+            onMatchResponse(it) // it == response
+        }.onFailure {
+            when (it) {
+                is ConnectException -> runOnUiThread {
+                    hideLoadingAndShowButton()
+                    Toast.makeText(this, R.string.internet_connection_failed, Toast.LENGTH_SHORT).show()
+                }
+                else -> runOnUiThread {
+                    hideLoadingAndShowButton()
+                    Toast.makeText(this, R.string.unknown_error_occurred, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    @Throws(ConnectException::class)
     private suspend fun requestMatch(request: MatchRequest) =
         withContext(Dispatchers.IO) {
             ApiRepository.instance.match(request)
@@ -108,7 +128,7 @@ class WaitingroomActivity : AppCompatActivity() {
                 // 기다리는 사람 없음. 다시 호출 필요
                 Timer().schedule(timerTask {
                     CoroutineScope(Dispatchers.IO).launch {
-                        if (!isLoggingOut) getTopic()
+                        if (!isLoggingOut) findMatch()
                     }
                 }, 1000)
             }
@@ -116,7 +136,7 @@ class WaitingroomActivity : AppCompatActivity() {
             // 오류발생 재시도
             Timer().schedule(timerTask {
                 CoroutineScope(Dispatchers.IO).launch {
-                    if (!isLoggingOut) getTopic()
+                    if (!isLoggingOut) findMatch()
                 }
             }, 1000)
         }

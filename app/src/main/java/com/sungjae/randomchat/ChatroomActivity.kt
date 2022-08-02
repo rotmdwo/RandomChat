@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
 import kotlinx.android.synthetic.main.activity_chatroom.*
 import org.eclipse.paho.client.mqttv3.*
@@ -17,6 +18,7 @@ class ChatroomActivity : AppCompatActivity() {
     private lateinit var mqttClient: MqttClient
     private lateinit var clientId: String
     private lateinit var topic: String
+    private var reconnected = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +75,18 @@ class ChatroomActivity : AppCompatActivity() {
         mqttClient.setCallback(object : MqttCallback {
             override fun connectionLost(cause: Throwable?) {
                 Log.e(application.packageName, "Connection Lost")
-                connect()
+
+                val timer = Timer()
+                timer.scheduleAtFixedRate(timerTask {
+                    if (!reconnected) {
+                        Log.d("connectionLost", "Trying to reconnect...")
+                        kotlin.runCatching { connect() }.onSuccess { reconnected = true }
+                    } else {
+                        Log.d("connectionLost", "Reconnected!!!")
+                        timer.cancel()
+                        reconnected = false
+                    }
+                }, 0L, 1000L)
             }
 
             override fun messageArrived(topic: String?, message: MqttMessage?) {
@@ -119,7 +132,16 @@ class ChatroomActivity : AppCompatActivity() {
 
     private fun publish(mqttClient: MqttClient, topic: String, message: String) {
         val json = "{\"id\":\""+clientId+"\",\"content\":\""+message+"\"}"
-        mqttClient.publish(topic, MqttMessage(json.toByteArray()))
+
+
+        kotlin.runCatching {
+            mqttClient.publish(topic, MqttMessage(json.toByteArray()))
+        }.onFailure {
+            runOnUiThread {
+                Toast.makeText(this, R.string.sending_message_delay, Toast.LENGTH_SHORT).show()
+            }
+            // TODO: 메시지 재전송 처리. EX) 큐 사용
+        }
     }
 
     private fun notifyEndOfChat() {

@@ -5,4 +5,7 @@
     <string name="looking_for_match">Looking for Match</string>
     <string name="cancel">Cancel</string>
     <string name="left_message">The counterpart left the chat.</string>
+    <string name="internet_connection_failed">Internet connection failed.</string>
+    <string name="unknown_error_occurred">An unknown error occurred.</string>
+    <string name="sending_message_delay">Having delay in message-sending.</string>
 </resources>
