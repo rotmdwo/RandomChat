@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.RandomChat"
         android:usesCleartextTraffic="true">
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-1098303019806816~8720190329" />
         <activity
             android:name=".WaitingroomActivity"
             android:exported="true" >

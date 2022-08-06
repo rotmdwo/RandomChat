@@ -6,6 +6,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.MobileAds
 import kotlinx.android.synthetic.main.activity_chatroom.*
 import org.eclipse.paho.client.mqttv3.*
 import org.json.JSONObject
@@ -23,6 +25,8 @@ class ChatroomActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chatroom)
+
+        initializeAd()
 
         // TODO: 에러처리 필요. null 시 종료
         clientId = intent.getStringExtra("clientId")!!
@@ -146,5 +150,14 @@ class ChatroomActivity : AppCompatActivity() {
 
     private fun notifyEndOfChat() {
         publish(mqttClient, getTopic(), endOfChatCode)
+    }
+
+    /* Ad Mob */
+    fun initializeAd() {
+        MobileAds.initialize(this) {
+            // OnInitializationCompleteListener
+            val adRequest = AdRequest.Builder().build()
+            avChatBanner.loadAd(adRequest)
+        }
     }
 }
