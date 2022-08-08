@@ -29,14 +29,29 @@ class WaitingroomActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_waitingroom)
 
-        // Firebase
-        database = Firebase.database.reference
-        database.child("server_ip").get().addOnSuccessListener { dataSnapshot ->
-            val serverIpAddress = dataSnapshot.getValue(String::class.java)
-            serverIpAddress?.let {
-                ApiRepository.instance = ApiGenerator().generate(ApiRepository::class.java, hostUrl = it)
+        // TODO: Splash 화면으로 이동
+        // SharedPreferences
+        PreferenceManager.create(this)
+        val serverIp = PreferenceManager.instance.getString("server_ip")
+        if (serverIp == null || "" == serverIp) {
+            database = Firebase.database.reference
+            database.child("server_ip").get().addOnSuccessListener { dataSnapshot ->
+                val serverIpAddress = dataSnapshot.getValue(String::class.java)
+                serverIpAddress?.let {
+                    ApiRepository.instance = ApiGenerator().generate(ApiRepository::class.java, hostUrl = it)
+                    PreferenceManager.instance.putString("server_ip", value = it)
+                } ?: run {
+                    // serverIpAddress가 null이면 실행
+                    Toast.makeText(this, getString(R.string.unable_to_connect_to_the_server), Toast.LENGTH_SHORT).show()
+                    finish()
+                }
             }
+        } else {
+            // SharedPreferences에 서버 저장되어 있음
+            ApiRepository.instance = ApiGenerator().generate(ApiRepository::class.java, hostUrl = serverIp)
+            // TODO: 서버에 ping 테스트, 실패하면 Firebase에서 서버 IP 새로 받기
         }
+
 
         clientId = MqttClient.generateClientId()
 

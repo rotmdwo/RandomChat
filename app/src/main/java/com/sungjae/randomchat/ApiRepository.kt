@@ -18,4 +18,6 @@ interface ApiRepository {
 
     @GET("/api/logout")
     suspend fun logout(@Query("request") clientId: String) : ApiResponse<String>
+
+    // TODO: GET - Ping 테스트
 }
