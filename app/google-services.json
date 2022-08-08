@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "500040052979",
+    "project_id": "randomchat-3ff2c",
+    "storage_bucket": "randomchat-3ff2c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:500040052979:android:8fed360283ea4c260f8786",
+        "android_client_info": {
+          "package_name": "com.sungjae.randomchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "500040052979-opv68gk4nfcbhsc3m1aanhdbt9atrp2p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZyaH8arStY4A_SNPibXxbgN5m-3CRS5s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "500040052979-opv68gk4nfcbhsc3m1aanhdbt9atrp2p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -10,7 +10,7 @@ import retrofit2.http.Query
 
 interface ApiRepository {
     companion object {
-        val instance = ApiGenerator().generate(ApiRepository::class.java)
+        lateinit var instance: ApiRepository
     }
 
     @POST("/api/match")

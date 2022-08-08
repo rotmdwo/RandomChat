@@ -72,6 +72,7 @@ class ChatroomActivity : AppCompatActivity() {
         val connectOptions = MqttConnectOptions()
         connectOptions.userName = "test"
         connectOptions.password = "5534".toCharArray()
+        connectOptions.isCleanSession = false // When cleanSession is set to false, an application must ensure it uses the same client identifier when it reconnects to the server to resume state and maintain assured message delivery.
         mqttClient.connect(connectOptions)
 
         // 수신 설정

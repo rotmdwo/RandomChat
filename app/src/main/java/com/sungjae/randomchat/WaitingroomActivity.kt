@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import com.sungjae.randomchat.request.MatchRequest
 import com.sungjae.randomchat.response.ApiResponse
 import com.sungjae.randomchat.response.MatchResponse
@@ -19,11 +22,21 @@ import kotlin.concurrent.timerTask
 class WaitingroomActivity : AppCompatActivity() {
     private lateinit var clientId: String
     private lateinit var loadingTimer: Timer
-    var isLoggingOut = false
+    private var isLoggingOut = false
+    private lateinit var database: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_waitingroom)
+
+        // Firebase
+        database = Firebase.database.reference
+        database.child("server_ip").get().addOnSuccessListener { dataSnapshot ->
+            val serverIpAddress = dataSnapshot.getValue(String::class.java)
+            serverIpAddress?.let {
+                ApiRepository.instance = ApiGenerator().generate(ApiRepository::class.java, hostUrl = it)
+            }
+        }
 
         clientId = MqttClient.generateClientId()
 
