@@ -34,22 +34,20 @@ class WaitingroomActivity : AppCompatActivity() {
         PreferenceManager.create(this)
         val serverIp = PreferenceManager.instance.getString("server_ip")
         if (serverIp == null || "" == serverIp) {
-            database = Firebase.database.reference
-            database.child("server_ip").get().addOnSuccessListener { dataSnapshot ->
-                val serverIpAddress = dataSnapshot.getValue(String::class.java)
-                serverIpAddress?.let {
-                    ApiRepository.instance = ApiGenerator().generate(ApiRepository::class.java, hostUrl = it)
-                    PreferenceManager.instance.putString("server_ip", value = it)
-                } ?: run {
-                    // serverIpAddress가 null이면 실행
-                    Toast.makeText(this, getString(R.string.unable_to_connect_to_the_server), Toast.LENGTH_SHORT).show()
-                    finish()
-                }
-            }
+            getServerIpFromFirebase()
         } else {
             // SharedPreferences에 서버 저장되어 있음
             ApiRepository.instance = ApiGenerator().generate(ApiRepository::class.java, hostUrl = serverIp)
-            // TODO: 서버에 ping 테스트, 실패하면 Firebase에서 서버 IP 새로 받기
+            // 서버에 ping 테스트, 실패하면 Firebase에서 서버 IP 새로 받기
+            CoroutineScope(Dispatchers.IO).launch {
+                kotlin.runCatching {
+                    // ping 테스트
+                    ApiRepository.instance.ping()
+                }.onFailure {
+                    // ping 테스트 실패 시 Firebase에서 최신주소 받아옴
+                    getServerIpFromFirebase()
+                }
+            }
         }
 
 
@@ -184,5 +182,24 @@ class WaitingroomActivity : AppCompatActivity() {
     private fun onLogoutResponse(response: ApiResponse<String>) {
         if (response.data == "ok") Log.d("API", "logged out successfully.")
         else Log.d("API", "log out error.")
+    }
+
+    private fun getServerIpFromFirebase() {
+        database = Firebase.database.reference
+        database.child("server_ip").get().addOnSuccessListener { dataSnapshot ->
+            val serverIpAddress = dataSnapshot.getValue(String::class.java)
+            serverIpAddress?.let {
+                // API 레포지토리 Instance 생성
+                ApiRepository.instance = ApiGenerator().generate(ApiRepository::class.java, hostUrl = it)
+                // SharedPreferences에 서버 IP 저장
+                PreferenceManager.instance.putString("server_ip", value = it)
+            } ?: run {
+                // serverIpAddress가 null이면 실행
+                runOnUiThread {
+                    Toast.makeText(this@WaitingroomActivity, getString(R.string.unable_to_connect_to_the_server), Toast.LENGTH_SHORT).show()
+                }
+                finish()
+            }
+        }
     }
 }
